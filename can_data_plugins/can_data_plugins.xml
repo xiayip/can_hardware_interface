@@ -1,0 +1,5 @@
+<library path="can_data_plugins">
+  <class type="can_data_plugins::PiperMotionCtrl2Data" base_class_type="can_data_plugins::CanDataBase">
+    <description>Piper CAN hardware data plugin.</description>
+  </class>
+</library>

@@ -1,0 +1,9 @@
+<library path="socket_can_hardware_interface">
+  <class name="socket_can_hardware_interface/SocketCanHardwareInterface"
+         type="socket_can_hardware_interface::SocketCanHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Socket CAN bus hardware interface.
+    </description>
+  </class>
+</library>
