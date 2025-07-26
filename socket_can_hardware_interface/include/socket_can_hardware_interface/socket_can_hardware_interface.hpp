@@ -39,7 +39,10 @@ public:
     std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
 private:
+    bool init_flag_;
+
     int can_socket_fd_;
+    double can_bus_status_;
 
     // can stuff
     pluginlib::ClassLoader<can_data_plugins::CanDataBase> can_data_loader_{"can_data_plugins", "can_data_plugins::CanDataBase"};

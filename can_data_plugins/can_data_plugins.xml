@@ -1,5 +1,14 @@
 <library path="can_data_plugins">
-  <class type="can_data_plugins::PiperMotionCtrl2Data" base_class_type="can_data_plugins::CanDataBase">
-    <description>Piper CAN hardware data plugin.</description>
+  <class type="can_data_plugins::PiperJointFeedback12" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint feedback messages joint 1 and joint2.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointFeedback34" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint feedback messages joint 3 and joint4.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointFeedback56" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint feedback messages joint 5 and joint6.</description>
+  </class>
+  <class type="can_data_plugins::PiperArmStatus" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper arm status messages.</description>
   </class>
 </library>

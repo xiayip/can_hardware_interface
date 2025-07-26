@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <chrono>
+#include <fcntl.h>
 
 namespace socket_can_hardware_interface {
 
@@ -21,25 +23,36 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
 
     // setup node data
     for (size_t i = 0; i < info_.joints.size(); i++) {
-        if (info_.joints[i].parameters["node_id"].empty()) {
-            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "No node id for '%s'", info_.joints[i].name.c_str());
+        if (info_.joints[i].parameters["can_address"].empty()) {
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "No CAN address for '%s'", info_.joints[i].name.c_str());
             return CallbackReturn::ERROR;
         }
         std::string device_type = info_.joints[i].parameters["device_type"];
-        auto node_id = std::stoi(info_.joints[i].parameters["node_id"]);
+        auto can_address = std::stoi(info_.joints[i].parameters["can_address"]);
 
-        if (device_type == "Piper") {
-            node_id =  node_id;
-            std::shared_ptr<can_data_plugins::CanDataBase> piper_data = can_data_loader_.createSharedInstance("can_data_plugins::LKMotorData");
-            if (piper_data->initialize(info_.joints[i])) {
-                can_data_[node_id] = piper_data;
+        if (device_type == "PIPER") {
+            std::map<int, std::string> canAdress_to_plugin = {
+                {0x2A5, "can_data_plugins::PiperJointFeedback12"},
+                {0x2A6, "can_data_plugins::PiperJointFeedback34"},
+                {0x2A7, "can_data_plugins::PiperJointFeedback56"},
+                {0x2A1, "can_data_plugins::PiperArmStatus"}
+            };
+            auto it = canAdress_to_plugin.find(can_address);
+            if (it != canAdress_to_plugin.end()) {
+                std::shared_ptr<can_data_plugins::CanDataBase> d = can_data_loader_.createSharedInstance(it->second);
+                if (d->initialize(info_.joints[i])) {
+                    can_data_[can_address] = d;
+                }
+            } else {
+                RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported CAN address '%u' for '%s'", can_address, info_.joints[i].name.c_str());
+                return CallbackReturn::ERROR;
             }
         }else {
-            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported motor type '%s'", device_type.c_str());
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported device type '%s'", device_type.c_str());
             return CallbackReturn::ERROR;
         }
-        RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "Node id for '%s' is '%u'",
-            info_.joints[i].name.c_str(), node_id);
+        RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN address for '%s' is '%u'",
+            info_.joints[i].name.c_str(), can_address);
     }
     return CallbackReturn::SUCCESS;
 }
@@ -76,11 +89,24 @@ CallbackReturn SocketCanHardwareInterface::on_configure(const rclcpp_lifecycle::
     }
     struct timeval timeout;
     timeout.tv_sec = 0;
-    timeout.tv_usec = 100000; // 100 milliseconds
+    timeout.tv_usec = 1000; // Reduce to 1 millisecond for faster response
     if (setsockopt(can_socket_fd_, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
-        perror("setsockopt failed");
+        RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "setsockopt failed");
         return CallbackReturn::ERROR;
     }
+    
+    // Set socket to non-blocking mode for better performance
+    int flags = fcntl(can_socket_fd_, F_GETFL, 0);
+    if (flags == -1) {
+        RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Failed to get socket flags");
+        return CallbackReturn::ERROR;
+    }
+    if (fcntl(can_socket_fd_, F_SETFL, flags | O_NONBLOCK) == -1) {
+        RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Failed to set socket to non-blocking");
+        return CallbackReturn::ERROR;
+    }
+    init_flag_ = false;
+    can_bus_status_ = 0.0;
     RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "Successfully bound to CAN interface %s", can_interface.c_str());
     return CallbackReturn::SUCCESS;
 }
@@ -106,6 +132,8 @@ std::vector<hardware_interface::StateInterface> SocketCanHardwareInterface::expo
     for (auto &[node_id, data] : can_data_) {
         data->export_state_interface(state_interfaces);
     }
+    state_interfaces.emplace_back(
+        hardware_interface::StateInterface(info_.hardware_parameters["can_interface"], "status", &can_bus_status_));
     return state_interfaces;
 }
 
@@ -136,37 +164,61 @@ SocketCanHardwareInterface::perform_command_mode_switch(const std::vector<std::s
 hardware_interface::return_type SocketCanHardwareInterface::read(const rclcpp::Time & /*time*/,
                                                          const rclcpp::Duration & /*period*/)
 {
+    
+    if (!init_flag_) {
+        return hardware_interface::return_type::OK;
+    }
+
     struct can_frame frame;
     ssize_t nbytes;
+    int frames_read = 0;
+    const int max_frames_per_cycle = can_data_.size() * 4;
+    const auto max_read_time = std::chrono::microseconds(can_data_.size() * 100); // Adjust based on expected frame size and processing time
 
-    // Set the socket to non-blocking mode if desired
-    // int flags = fcntl(can_socket_fd_, F_GETFL, 0);
-    // fcntl(can_socket_fd_, F_SETFL, flags | O_NONBLOCK);
-
-    while (true) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    while (frames_read <= max_frames_per_cycle) {
+        auto current_time = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time);
+        
+        // Break if we've spent too much time reading
+        if (elapsed >= max_read_time) {
+            if (frames_read > 0) {
+                RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"), 
+                           "Read timeout after %ld μs, processed %d frames", elapsed.count(), frames_read);
+            }
+            break;
+        }
+        
         nbytes = ::read(can_socket_fd_, &frame, sizeof(struct can_frame));
         if (nbytes < 0) {
+            // Socket would block or no more data available
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // No more frames to read
-                break;
+                break; // No more data available, exit cleanly
             } else {
-                RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Error reading from CAN socket: %s", strerror(errno));
-                return hardware_interface::return_type::ERROR;
+                RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN read error: %s", strerror(errno));
+                break;
             }
-        } else if (nbytes < static_cast<ssize_t>(sizeof(struct can_frame))) { // fix the warning: 
-            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Incomplete CAN frame received");
+        } else if (nbytes < sizeof(struct can_frame)) {
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Incomplete CAN frame");
             return hardware_interface::return_type::ERROR;
         } else {
+            frames_read++;
             // Process the received CAN frame
             auto it = can_data_.find(frame.can_id);
             if (it != can_data_.end()) {
                 it->second->read_state(frame.can_id, frame.data);
             } else {
-                RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"),
-                            "Received frame with unknown CAN ID: 0x%X", frame.can_id);
+                // RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"),
+                //             "Received frame with unknown CAN ID: 0x%X", frame.can_id);
             }
         }
     }
+    
+    if (frames_read > max_frames_per_cycle) {
+        RCLCPP_DEBUG(rclcpp::get_logger("SocketCanHardwareInterface"), 
+                   "Frames read: (%d) Hit max frames limit (%d) in read cycle, consider increasing cycle rate", frames_read, max_frames_per_cycle);
+    }
+    
     return hardware_interface::return_type::OK;
 }
 
@@ -177,13 +229,15 @@ hardware_interface::return_type SocketCanHardwareInterface::write(const rclcpp::
         struct can_frame frame;
         frame.can_id = node_id;
         frame.len = 8;
+        std::memset(frame.data, 0, sizeof(frame.data));
         data->write_target(node_id, frame.data);
         ssize_t nbytes = ::write(can_socket_fd_, &frame, sizeof(struct can_frame));
         if (nbytes < 0) {
             RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN write error for node ID %u", node_id);
-            return hardware_interface::return_type::ERROR;
+            // return hardware_interface::return_type::ERROR;
         }
     }
+    init_flag_ = true;
     return hardware_interface::return_type::OK;
 }
 

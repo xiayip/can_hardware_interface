@@ -29,7 +29,10 @@ pluginlib_export_plugin_description_file(can_data_plugins can_data_plugins.xml)
 add_library(
   can_data_plugins
   SHARED
-  src/piper_motion_ctrl_2_data.cpp
+  src/piper_joint_feedback_12.cpp
+  src/piper_joint_feedback_34.cpp
+  src/piper_joint_feedback_56.cpp
+  src/piper_arm_status.cpp
 )
 ament_target_dependencies(
   can_data_plugins
