@@ -11,4 +11,22 @@
   <class type="can_data_plugins::PiperArmStatus" base_class_type="can_data_plugins::CanDataBase">
     <description>Plugin for parsing Piper arm status messages.</description>
   </class>
+  <class type="can_data_plugins::PiperArmMotionCtrl1" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper arm motion with advanced features.</description>
+  </class>
+  <class type="can_data_plugins::PiperArmMotionCtrl2" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper arm motion with advanced features.</description>
+  </class>
+  <class type="can_data_plugins::PiperArmDisableEnableConfig" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for enabling or disabling the Piper arm.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointCtrl12" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 1 and joint 2.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointCtrl34" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 3 and joint 4.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointCtrl56" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 5 and joint 6.</description>
+  </class>
 </library>

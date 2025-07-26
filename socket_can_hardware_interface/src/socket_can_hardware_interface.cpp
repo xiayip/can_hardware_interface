@@ -35,7 +35,13 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
                 {0x2A5, "can_data_plugins::PiperJointFeedback12"},
                 {0x2A6, "can_data_plugins::PiperJointFeedback34"},
                 {0x2A7, "can_data_plugins::PiperJointFeedback56"},
-                {0x2A1, "can_data_plugins::PiperArmStatus"}
+                {0x2A1, "can_data_plugins::PiperArmStatus"},
+                {0x150, "can_data_plugins::PiperArmMotionCtrl1"},
+                {0x151, "can_data_plugins::PiperArmMotionCtrl2"},
+                {0x471, "can_data_plugins::PiperArmDisableEnableConfig"},
+                {0x155, "can_data_plugins::PiperJointCtrl12"},
+                {0x156, "can_data_plugins::PiperJointCtrl34"},
+                {0x157, "can_data_plugins::PiperJointCtrl56"}
             };
             auto it = canAdress_to_plugin.find(can_address);
             if (it != canAdress_to_plugin.end()) {
@@ -230,11 +236,12 @@ hardware_interface::return_type SocketCanHardwareInterface::write(const rclcpp::
         frame.can_id = node_id;
         frame.len = 8;
         std::memset(frame.data, 0, sizeof(frame.data));
-        data->write_target(node_id, frame.data);
-        ssize_t nbytes = ::write(can_socket_fd_, &frame, sizeof(struct can_frame));
-        if (nbytes < 0) {
-            RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN write error for node ID %u", node_id);
-            // return hardware_interface::return_type::ERROR;
+        if (data->write_target(node_id, frame.data)) {
+            ssize_t nbytes = ::write(can_socket_fd_, &frame, sizeof(struct can_frame));
+            if (nbytes < 0) {
+                RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN write error for node ID 0x%02x", node_id);
+                // return hardware_interface::return_type::ERROR;
+            }
         }
     }
     init_flag_ = true;

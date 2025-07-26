@@ -44,11 +44,12 @@ struct PiperJointFeedback12 : public can_data_plugins::CanDataBase
         joint_2_actual_position = static_cast<double>((data[4] << 24)
             | (data[5] << 16) | (data[6] << 8) | data[7]) / (1000.0 * radian_to_degree);
         // RCLCPP_INFO(rclcpp::get_logger("PiperJointCtrlData"), "Read state for ID %d: Joint 1: %.2f rad, Joint 2: %.2f rad",
-            // id, joint_1_actual_position, joint_2_actual_position);
+        //     id, joint_1_actual_position, joint_2_actual_position);
     }
 
-    void write_target(const int id, uint8_t (&data)[8])
+    bool write_target(const int id, uint8_t (&data)[8])
     {
+        return false;
     }
 
     bool perform_switch(const std::vector<std::string> &start_interfaces,

@@ -63,8 +63,9 @@ struct PiperArmStatus : public can_data_plugins::CanDataBase
         //     id, ctrl_mode, arm_status, mode_feed, teach_status, motion_status, trajectory_num, err_code);
     }
 
-    void write_target(const int id, uint8_t (&data)[8])
+    bool write_target(const int id, uint8_t (&data)[8])
     {
+        return false;
     }
 
     bool perform_switch(const std::vector<std::string> &start_interfaces,

@@ -19,7 +19,7 @@ public:
 
     virtual void read_state(const int id, const uint8_t data[8]) = 0;
 
-    virtual void write_target(const int id, uint8_t (&data)[8]) = 0;
+    virtual bool write_target(const int id, uint8_t (&data)[8]) = 0;
 
     virtual bool perform_switch(const std::vector<std::string> &start_interfaces,
                                 const std::vector<std::string> &stop_interfaces) = 0;

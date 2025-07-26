@@ -47,8 +47,9 @@ struct PiperJointFeedback56 : public can_data_plugins::CanDataBase
         //     id, joint_5_actual_position, joint_6_actual_position);
     }
 
-    void write_target(const int id, uint8_t (&data)[8])
+    bool write_target(const int id, uint8_t (&data)[8])
     {
+        return false;
     }
 
     bool perform_switch(const std::vector<std::string> &start_interfaces,

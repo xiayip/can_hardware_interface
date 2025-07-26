@@ -33,6 +33,12 @@ add_library(
   src/piper_joint_feedback_34.cpp
   src/piper_joint_feedback_56.cpp
   src/piper_arm_status.cpp
+  src/piper_arm_motion_ctrl1.cpp
+  src/piper_arm_motion_ctrl2.cpp
+  src/piper_arm_disable_enable_config.cpp
+  src/piper_joint_ctrl_12.cpp
+  src/piper_joint_ctrl_34.cpp
+  src/piper_joint_ctrl_56.cpp
 )
 ament_target_dependencies(
   can_data_plugins
