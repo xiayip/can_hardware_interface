@@ -33,6 +33,7 @@
             0x01: MOVE J (Joint).
             0x02: MOVE L (Linear).
             0x03: MOVE C (Circular).
+            0x04: MOVE M ---基于V1.5-2版本后
 
         Byte 2 speed_percentage: uint8, movement speed as a percentage.
             Range: 0~100.
@@ -59,9 +60,20 @@ struct PiperArmMotionCtrl2 : public can_data_plugins::CanDataBase
     bool initialize(hardware_interface::ComponentInfo &joint)
     {
         control_mode = 1.0;
-        move_mode = 1.0; // MOVE J
         move_spd_rate_ctrl = 100.0; // 100%
-        mit_mode = 0.0; // Position-speed mode
+        mit_mode = joint.parameters.find("mit_mode") != joint.parameters.end()
+                                ? std::stod(joint.parameters["mit_mode"])
+                                : 0.0;
+        if (mit_mode == 0x00) {
+            move_mode = 1.0; // MOVE J
+            RCLCPP_INFO(rclcpp::get_logger("PiperArmMotionCtrl2"), "MIT mode is set to 0x00 (0)");
+        } else if (mit_mode == 0xAD) {
+            move_mode = 4.0; // MOVE M
+            RCLCPP_INFO(rclcpp::get_logger("PiperArmMotionCtrl2"), "MIT mode is set to 0xAD (173)");
+        } else {
+            RCLCPP_ERROR(rclcpp::get_logger("PiperArmMotionCtrl2"), "Invalid MIT mode: %f", mit_mode);
+            return false;
+        }
         return true;
     }
 
