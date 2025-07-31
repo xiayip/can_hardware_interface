@@ -29,4 +29,22 @@
   <class type="can_data_plugins::PiperJointCtrl56" base_class_type="can_data_plugins::CanDataBase">
     <description>Plugin for controlling Piper joint 5 and joint 6.</description>
   </class>
+  <class type="can_data_plugins::PiperJointMitCtrl1" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 1 with MIT mode.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointMitCtrl2" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 2 with MIT mode.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointMitCtrl3" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 3 with MIT mode.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointMitCtrl4" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 4 with MIT mode.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointMitCtrl5" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 5 with MIT mode.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointMitCtrl6" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for controlling Piper joint 6 with MIT mode.</description>
+  </class>
 </library>

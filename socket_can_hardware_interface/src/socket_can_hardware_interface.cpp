@@ -41,7 +41,13 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
                 {0x471, "can_data_plugins::PiperArmDisableEnableConfig"},
                 {0x155, "can_data_plugins::PiperJointCtrl12"},
                 {0x156, "can_data_plugins::PiperJointCtrl34"},
-                {0x157, "can_data_plugins::PiperJointCtrl56"}
+                {0x157, "can_data_plugins::PiperJointCtrl56"},
+                {0x15A, "can_data_plugins::PiperJointMitCtrl1"},
+                {0x15B, "can_data_plugins::PiperJointMitCtrl2"},
+                {0x15C, "can_data_plugins::PiperJointMitCtrl3"},
+                {0x15D, "can_data_plugins::PiperJointMitCtrl4"},
+                {0x15E, "can_data_plugins::PiperJointMitCtrl5"},
+                {0x15F, "can_data_plugins::PiperJointMitCtrl6"},
             };
             auto it = canAdress_to_plugin.find(can_address);
             if (it != canAdress_to_plugin.end()) {

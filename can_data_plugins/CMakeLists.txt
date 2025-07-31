@@ -26,20 +26,14 @@ include_directories(include)
 pluginlib_export_plugin_description_file(can_data_plugins can_data_plugins.xml)
 
 # add can data plugin
+# find all cpp files in src directory
+file(GLOB_RECURSE CAN_DATA_PLUGIN_SRC_FILES src/*.cpp)
 add_library(
   can_data_plugins
   SHARED
-  src/piper_joint_feedback_12.cpp
-  src/piper_joint_feedback_34.cpp
-  src/piper_joint_feedback_56.cpp
-  src/piper_arm_status.cpp
-  src/piper_arm_motion_ctrl1.cpp
-  src/piper_arm_motion_ctrl2.cpp
-  src/piper_arm_disable_enable_config.cpp
-  src/piper_joint_ctrl_12.cpp
-  src/piper_joint_ctrl_34.cpp
-  src/piper_joint_ctrl_56.cpp
+  ${CAN_DATA_PLUGIN_SRC_FILES}
 )
+
 ament_target_dependencies(
   can_data_plugins
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
