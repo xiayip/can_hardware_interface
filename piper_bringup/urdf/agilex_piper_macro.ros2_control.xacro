@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:macro name="agilex_piper_ros2_control" params="
+               name
+               use_mock_hardware:=false
+               mock_sensor_commands:=false
+               sim_gazebo_classic:=false
+               sim_gazebo:=false
+               sim_isaac_sim:=false
+               simulation_controllers"
+               >
+
+    <xacro:if value="${use_mock_hardware}">
+      <xacro:include filename="agilex_piper/include/mock.ros2_control.xacro"/>
+    </xacro:if>
+
+    <xacro:if value="${sim_gazebo_classic}">
+      <xacro:include filename="agilex_piper/include/gazebo_classic.ros2_control.xacro"/>
+    </xacro:if>
+
+    <xacro:if value="${sim_gazebo}">
+      <xacro:include filename="agilex_piper/include/gazebo.ros2_control.xacro"/>
+    </xacro:if>
+
+    <xacro:if value="${sim_isaac_sim}">
+      <xacro:include filename="agilex_piper/include/isaac_sim.ros2_control.xacro"/>
+    </xacro:if>
+
+    <xacro:unless value="${use_mock_hardware or sim_gazebo_classic or sim_gazebo or sim_isaac_sim}">
+      <xacro:include filename="agilex_piper/include/real_world.ros2_control.xacro"/>
+    </xacro:unless> 
+
+  </xacro:macro>
+</robot>
