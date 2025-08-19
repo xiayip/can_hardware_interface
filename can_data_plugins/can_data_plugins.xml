@@ -47,4 +47,7 @@
   <class type="can_data_plugins::PiperJointMitCtrl6" base_class_type="can_data_plugins::CanDataBase">
     <description>Plugin for controlling Piper joint 6 with MIT mode.</description>
   </class>
+  <class type="can_data_plugins::OmniPickerData" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing OmniPicker data messages.</description>
+  </class>
 </library>

@@ -59,7 +59,12 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
                 RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported CAN address '%u' for '%s'", can_address, info_.joints[i].name.c_str());
                 return CallbackReturn::ERROR;
             }
-        }else {
+        } else if (device_type == "OmniPicker") {
+            std::shared_ptr<can_data_plugins::CanDataBase> omni_picker = can_data_loader_.createSharedInstance("can_data_plugins::OmniPickerData");
+            if (omni_picker->initialize(info_.joints[i])) {
+                can_data_[can_address] = omni_picker;
+            }
+        } else {
             RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported device type '%s'", device_type.c_str());
             return CallbackReturn::ERROR;
         }
