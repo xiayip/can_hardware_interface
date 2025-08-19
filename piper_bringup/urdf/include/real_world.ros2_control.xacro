@@ -4,7 +4,7 @@
   <ros2_control name="${name}" type="system">
     <hardware>
         <plugin>socket_can_hardware_interface/SocketCanHardwareInterface</plugin>
-        <param name="can_interface">can_piper</param>
+        <param name="can_interface">can1</param>
     </hardware>
 
     <joint name="arm_status">

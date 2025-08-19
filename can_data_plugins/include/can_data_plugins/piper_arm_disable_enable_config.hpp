@@ -8,12 +8,25 @@
 
 #include "can_data_plugins/can_data_base.hpp"
 
+/*
+Enable the motor(s).
+
+CAN ID:
+    0x471
+
+Args:
+    motor_num (int): The motor number, ranging from 1 to 7. 
+                    7 represents all motors.
+    enable_flag (int): The enable flag.
+        0x01: Disable   
+*/
+
 namespace can_data_plugins
 {
 
 struct PiperArmDisableEnableConfig : public can_data_plugins::CanDataBase
 {
-    bool init_flag_ = false;
+    int init_count_ = 50;
 
     bool initialize(hardware_interface::ComponentInfo &joint)
     {
@@ -34,10 +47,10 @@ struct PiperArmDisableEnableConfig : public can_data_plugins::CanDataBase
 
     bool write_target(const int id, uint8_t (&data)[8])
     {
-        if (!init_flag_) {
-            data[0] = 0xFF; // select all joints
+        if (init_count_ > 0) {
+            data[0] = 0x07; // select all joints
             data[1] = 0x02; // enable arm
-            init_flag_ = true;
+            init_count_--;
             // RCLCPP_INFO(rclcpp::get_logger("PiperArmDisableEnableConfig"), "Write target for ID %03x: Arm enabled", id);
             return true;
         }
