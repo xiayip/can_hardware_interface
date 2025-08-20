@@ -47,6 +47,24 @@
   <class type="can_data_plugins::PiperJointMitCtrl6" base_class_type="can_data_plugins::CanDataBase">
     <description>Plugin for controlling Piper joint 6 with MIT mode.</description>
   </class>
+  <class type="can_data_plugins::PiperJointHighSpeedFeedback1" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint 1 high speed feedback messages.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointHighSpeedFeedback2" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint 2 high speed feedback messages.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointHighSpeedFeedback3" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint 3 high speed feedback messages.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointHighSpeedFeedback4" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint 4 high speed feedback messages.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointHighSpeedFeedback5" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint 5 high speed feedback messages.</description>
+  </class>
+  <class type="can_data_plugins::PiperJointHighSpeedFeedback6" base_class_type="can_data_plugins::CanDataBase">
+    <description>Plugin for parsing Piper joint 6 high speed feedback messages.</description>
+  </class>
   <class type="can_data_plugins::OmniPickerData" base_class_type="can_data_plugins::CanDataBase">
     <description>Plugin for parsing OmniPicker data messages.</description>
   </class>
