@@ -52,6 +52,8 @@ namespace can_data_plugins
 
 struct PiperArmMotionCtrl2 : public can_data_plugins::CanDataBase
 {
+    int init_count_ = 50;
+
     double control_mode = std::numeric_limits<double>::quiet_NaN();
     double move_mode = std::numeric_limits<double>::quiet_NaN();
     double move_spd_rate_ctrl = std::numeric_limits<double>::quiet_NaN();
@@ -91,12 +93,16 @@ struct PiperArmMotionCtrl2 : public can_data_plugins::CanDataBase
 
     bool write_target(const int id, uint8_t (&data)[8])
     {   
-        data[0] = static_cast<uint8_t>(control_mode); // Control mode
-        data[1] = static_cast<uint8_t>(move_mode); // MOVE mode
-        data[2] = static_cast<uint8_t>(move_spd_rate_ctrl); // Speed percentage
-        data[3] = static_cast<uint8_t>(mit_mode); // MIT mode
-        // RCLCPP_INFO(rclcpp::get_logger("PiperArmMotionCtrl2"), "Write target for ID %03x: Control mode set to CAN command control mode, Move mode set to MOVE J, Speed set to 100%%", id);
-        return true;
+        if (init_count_ > 0) {
+            data[0] = static_cast<uint8_t>(control_mode); // Control mode
+            data[1] = static_cast<uint8_t>(move_mode); // MOVE mode
+            data[2] = static_cast<uint8_t>(move_spd_rate_ctrl); // Speed percentage
+            data[3] = static_cast<uint8_t>(mit_mode); // MIT mode
+            init_count_--;
+            // RCLCPP_INFO(rclcpp::get_logger("PiperArmMotionCtrl2"), "Write target for ID %03x: Control mode set to CAN command control mode, Move mode set to MOVE J, Speed set to 100%%", id);
+            return true;
+        }
+        return false;
     }
 
     bool perform_switch(const std::vector<std::string> &start_interfaces,
