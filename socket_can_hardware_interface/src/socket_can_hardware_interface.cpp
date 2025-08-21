@@ -23,10 +23,6 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
 
     // setup node data
     for (size_t i = 0; i < info_.joints.size(); i++) {
-        if (info_.joints[i].parameters["can_address"].empty()) {
-            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "No CAN address for '%s'", info_.joints[i].name.c_str());
-            return CallbackReturn::ERROR;
-        }
         std::string device_type = info_.joints[i].parameters["device_type"];
         // check can address
         if (info_.joints[i].parameters["can_address"].empty()) {
@@ -53,8 +49,8 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
             return CallbackReturn::ERROR;
         }
 
-        RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN address for '%s' is '%u'",
-            info_.joints[i].name.c_str(), can_address);
+        RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN address for '%s' is '%u', device type '%s'",
+            info_.joints[i].name.c_str(), can_address, device_type.c_str());
     }
     return CallbackReturn::SUCCESS;
 }
