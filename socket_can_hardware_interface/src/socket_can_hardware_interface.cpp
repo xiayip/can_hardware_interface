@@ -40,7 +40,12 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
             return CallbackReturn::ERROR;
         }
         std::string protocol_plugin_name = info_.joints[i].parameters["protocol_plugin"];
+        // create protocol plugin instance
         std::shared_ptr<can_data_plugins::CanDataBase> protocol_plugin = can_data_loader_.createSharedInstance(protocol_plugin_name);
+        if (!protocol_plugin) {
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Failed to create protocol plugin '%s' for '%s'", protocol_plugin_name.c_str(), info_.joints[i].name.c_str());
+            return CallbackReturn::ERROR;
+        }
         if (protocol_plugin->initialize(info_.joints[i])) {
             can_data_[can_address] = protocol_plugin;
         } else {
