@@ -28,52 +28,26 @@ CallbackReturn SocketCanHardwareInterface::on_init(const hardware_interface::Har
             return CallbackReturn::ERROR;
         }
         std::string device_type = info_.joints[i].parameters["device_type"];
-        auto can_address = std::stoi(info_.joints[i].parameters["can_address"]);
-
-        if (device_type == "PIPER") {
-            std::map<int, std::string> canAdress_to_plugin = {
-                {0x2A5, "can_data_plugins::PiperJointFeedback12"},
-                {0x2A6, "can_data_plugins::PiperJointFeedback34"},
-                {0x2A7, "can_data_plugins::PiperJointFeedback56"},
-                {0x251, "can_data_plugins::PiperJointHighSpeedFeedback1"},
-                {0x252, "can_data_plugins::PiperJointHighSpeedFeedback2"},
-                {0x253, "can_data_plugins::PiperJointHighSpeedFeedback3"},
-                {0x254, "can_data_plugins::PiperJointHighSpeedFeedback4"},
-                {0x255, "can_data_plugins::PiperJointHighSpeedFeedback5"},
-                {0x256, "can_data_plugins::PiperJointHighSpeedFeedback6"},
-                {0x2A1, "can_data_plugins::PiperArmStatus"},
-                {0x150, "can_data_plugins::PiperArmMotionCtrl1"},
-                {0x151, "can_data_plugins::PiperArmMotionCtrl2"},
-                {0x471, "can_data_plugins::PiperArmDisableEnableConfig"},
-                {0x155, "can_data_plugins::PiperJointCtrl12"},
-                {0x156, "can_data_plugins::PiperJointCtrl34"},
-                {0x157, "can_data_plugins::PiperJointCtrl56"},
-                {0x15A, "can_data_plugins::PiperJointMitCtrl1"},
-                {0x15B, "can_data_plugins::PiperJointMitCtrl2"},
-                {0x15C, "can_data_plugins::PiperJointMitCtrl3"},
-                {0x15D, "can_data_plugins::PiperJointMitCtrl4"},
-                {0x15E, "can_data_plugins::PiperJointMitCtrl5"},
-                {0x15F, "can_data_plugins::PiperJointMitCtrl6"},
-            };
-            auto it = canAdress_to_plugin.find(can_address);
-            if (it != canAdress_to_plugin.end()) {
-                std::shared_ptr<can_data_plugins::CanDataBase> d = can_data_loader_.createSharedInstance(it->second);
-                if (d->initialize(info_.joints[i])) {
-                    can_data_[can_address] = d;
-                }
-            } else {
-                RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported CAN address '%u' for '%s'", can_address, info_.joints[i].name.c_str());
-                return CallbackReturn::ERROR;
-            }
-        } else if (device_type == "OmniPicker") {
-            std::shared_ptr<can_data_plugins::CanDataBase> omni_picker = can_data_loader_.createSharedInstance("can_data_plugins::OmniPickerData");
-            if (omni_picker->initialize(info_.joints[i])) {
-                can_data_[can_address] = omni_picker;
-            }
-        } else {
-            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Unsupported device type '%s'", device_type.c_str());
+        // check can address
+        if (info_.joints[i].parameters["can_address"].empty()) {
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "No CAN address for '%s'", info_.joints[i].name.c_str());
             return CallbackReturn::ERROR;
         }
+        auto can_address = std::stoi(info_.joints[i].parameters["can_address"]);
+        // check protocol plugin
+        if (info_.joints[i].parameters["protocol_plugin"].empty()) {
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "No protocol plugin for '%s'", info_.joints[i].name.c_str());
+            return CallbackReturn::ERROR;
+        }
+        std::string protocol_plugin_name = info_.joints[i].parameters["protocol_plugin"];
+        std::shared_ptr<can_data_plugins::CanDataBase> protocol_plugin = can_data_loader_.createSharedInstance(protocol_plugin_name);
+        if (protocol_plugin->initialize(info_.joints[i])) {
+            can_data_[can_address] = protocol_plugin;
+        } else {
+            RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Failed to initialize protocol plugin '%s' for '%s'", protocol_plugin_name.c_str(), info_.joints[i].name.c_str());
+            return CallbackReturn::ERROR;
+        }
+
         RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN address for '%s' is '%u'",
             info_.joints[i].name.c_str(), can_address);
     }
