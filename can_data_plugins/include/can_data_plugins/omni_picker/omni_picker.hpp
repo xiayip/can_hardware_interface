@@ -92,7 +92,7 @@ namespace can_data_plugins
 
         bool write_target(const int id, uint8_t (&data)[8])
         {
-            uint8_t target_position_raw = static_cast<uint8_t>(target_position * 255.0);
+            uint8_t target_position_raw = static_cast<uint8_t>((1.0f - target_position) * 255.0);
             data[1] = target_position_raw;
             uint8_t target_velocity_raw = static_cast<uint8_t>(target_velocity * 255.0);
             data[2] = target_velocity_raw;
