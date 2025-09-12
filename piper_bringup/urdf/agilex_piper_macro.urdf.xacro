@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="agilex_piper" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="agilex_piper" params="*origin name=agilex_piper parent=base_link">
 
@@ -210,13 +210,4 @@
       <limit lower="-2.0944" upper="2.0944" effort="100" velocity="5" />
     </joint>
   </xacro:macro>
-
-  <xacro:agilex_piper name="agilex_piper" parent="base_link"/>
-  <xacro:agilex_piper_ros2_control name="agilex_piper_ros2_control"
-                                    use_mock_hardware="${use_mock_hardware}"
-                                    mock_sensor_commands="${mock_sensor_commands}"
-                                    sim_gazebo_classic="${sim_gazebo_classic}"
-                                    sim_gazebo="${sim_gazebo}"
-                                    sim_isaac_sim="${sim_isaac_sim}"
-                                    simulation_controllers="${simulation_controllers}"/>
 </robot>

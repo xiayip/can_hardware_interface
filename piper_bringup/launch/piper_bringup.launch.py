@@ -88,7 +88,7 @@ def generate_launch_description():
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("piper_bringup"), "urdf", "agilex_piper_macro.urdf.xacro"]
+                [FindPackageShare("piper_bringup"), "urdf", "agilex_piper_single.system.xacro"]
             ),
             " ",
             "use_mock_hardware:=",
