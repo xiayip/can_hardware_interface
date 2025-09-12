@@ -8,21 +8,31 @@
   <xacro:arg name="sim_gazebo" default="false"/>
   <xacro:arg name="sim_isaac_sim" default="false"/>
   <xacro:arg name="simulation_controllers" default=""/>
-  <xacro:arg name="prefix" default=""/>
   
   <!-- Define base_link -->
   <link name="base_link"/>
   
   <!-- Include the urdf macro -->
   <xacro:include filename="$(find piper_bringup)/urdf/agilex_piper_macro.urdf.xacro"/>
-  <xacro:agilex_piper name="agilex_piper" parent="base_link" prefix="$(arg prefix)">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+  <xacro:agilex_piper name="arm" parent="base_link" prefix="left_">
+    <origin xyz="-0.35 0 0" rpy="0 0 0" />
+  </xacro:agilex_piper>
+  <xacro:agilex_piper name="arm" parent="base_link" prefix="right_">
+    <origin xyz="0.35 0 0" rpy="0 0 0" />
   </xacro:agilex_piper>
 
   <!-- Include the ros2_control macro -->
   <xacro:include filename="$(find piper_bringup)/urdf/agilex_piper_macro.ros2_control.xacro"/>
-  <xacro:agilex_piper_ros2_control  name="agilex_piper_ros2_control"
-                                    prefix="$(arg prefix)"
+  <xacro:agilex_piper_ros2_control  name="left_arm_ros2_control"
+                                    prefix="left_"
+                                    use_mock_hardware="$(arg use_mock_hardware)"
+                                    mock_sensor_commands="$(arg mock_sensor_commands)"
+                                    sim_gazebo_classic="$(arg sim_gazebo_classic)"
+                                    sim_gazebo="$(arg sim_gazebo)"
+                                    sim_isaac_sim="$(arg sim_isaac_sim)"
+                                    simulation_controllers="$(arg simulation_controllers)"/>
+  <xacro:agilex_piper_ros2_control  name="right_arm_ros2_control"
+                                    prefix="right_"
                                     use_mock_hardware="$(arg use_mock_hardware)"
                                     mock_sensor_commands="$(arg mock_sensor_commands)"
                                     sim_gazebo_classic="$(arg sim_gazebo_classic)"

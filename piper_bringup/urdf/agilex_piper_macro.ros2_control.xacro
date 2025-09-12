@@ -3,6 +3,7 @@
 
   <xacro:macro name="agilex_piper_ros2_control" params="
                name
+               prefix:=''
                use_mock_hardware:=false
                mock_sensor_commands:=false
                sim_gazebo_classic:=false
