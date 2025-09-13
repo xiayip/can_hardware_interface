@@ -10,26 +10,31 @@
     <joint name="arm_status">
         <param name="device_type">PIPER</param>
         <param name="can_address">673</param>  <!-- 0x2A1 = 673 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperArmStatus</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint12_feedback">
         <param name="device_type">PIPER</param>
         <param name="can_address">677</param>  <!-- 0x2A5 = 677 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointFeedback12</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint34_feedback">
         <param name="device_type">PIPER</param>
         <param name="can_address">678</param>  <!-- 0x2A6 = 678 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointFeedback34</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint56_feedback">
         <param name="device_type">PIPER</param>
         <param name="can_address">679</param>  <!-- 0x2A7 = 679 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointFeedback56</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="arm_disable_enable_config">
         <param name="device_type">PIPER</param>
         <param name="can_address">1137</param>  <!-- 0x471 = 1137 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperArmDisableEnableConfig</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <!-- <joint name="arm_motion_ctrl1"> -->
@@ -41,36 +46,43 @@
         <param name="device_type">PIPER</param>
         <param name="can_address">337</param>  <!-- 0x151 = 337 decimal -->
         <param name="mit_mode">173</param>  <!-- 0x00: Position-speed mode. 0xAD(173): MIT mode. -->
+        <param name="protocol_plugin">can_data_plugins::PiperArmMotionCtrl2</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint1_ctrl">
         <param name="device_type">PIPER</param>
         <param name="can_address">346</param>  <!-- 0x15A = 346 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointMitCtrl1</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint2_ctrl">
         <param name="device_type">PIPER</param>
         <param name="can_address">347</param>  <!-- 0x15B = 347 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointMitCtrl2</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint3_ctrl">
         <param name="device_type">PIPER</param>
         <param name="can_address">348</param>  <!-- 0x15C = 348 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointMitCtrl3</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint4_ctrl">
         <param name="device_type">PIPER</param>
         <param name="can_address">349</param>  <!-- 0x15D = 349 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointMitCtrl4</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint5_ctrl">
         <param name="device_type">PIPER</param>
         <param name="can_address">350</param>  <!-- 0x15E = 350 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointMitCtrl5</param>
         <param name="prefix">${prefix}</param>
     </joint>
     <joint name="joint6_ctrl">
         <param name="device_type">PIPER</param>
         <param name="can_address">351</param>  <!-- 0x15F = 351 decimal -->
+        <param name="protocol_plugin">can_data_plugins::PiperJointMitCtrl6</param>
         <param name="prefix">${prefix}</param>
     </joint>
 
