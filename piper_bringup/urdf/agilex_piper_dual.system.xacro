@@ -26,6 +26,7 @@
   <xacro:include filename="$(find piper_bringup)/urdf/agilex_piper_macro.ros2_control.xacro"/>
   <xacro:agilex_piper_ros2_control  name="left_arm_ros2_control"
                                     prefix="left_"
+                                    can_interface="can0"
                                     use_mock_hardware="$(arg use_mock_hardware)"
                                     mock_sensor_commands="$(arg mock_sensor_commands)"
                                     sim_gazebo_classic="$(arg sim_gazebo_classic)"
@@ -34,6 +35,7 @@
                                     simulation_controllers="$(arg simulation_controllers)"/>
   <xacro:agilex_piper_ros2_control  name="right_arm_ros2_control"
                                     prefix="right_"
+                                    can_interface="can1"
                                     use_mock_hardware="$(arg use_mock_hardware)"
                                     mock_sensor_commands="$(arg mock_sensor_commands)"
                                     sim_gazebo_classic="$(arg sim_gazebo_classic)"
