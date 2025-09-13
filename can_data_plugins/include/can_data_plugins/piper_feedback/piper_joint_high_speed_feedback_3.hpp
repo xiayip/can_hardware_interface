@@ -36,6 +36,8 @@ namespace can_data_plugins
 
 struct PiperJointHighSpeedFeedback3 : public can_data_plugins::CanDataBase
 {
+    std::string prefix;
+
     double COEFFICIENT_1_to_3 = 1.18125;
     double COEFFICIENT_4_to_6 = 0.95844;
     double joint_3_actual_velocity = 0.0;
@@ -43,15 +45,19 @@ struct PiperJointHighSpeedFeedback3 : public can_data_plugins::CanDataBase
 
     bool initialize(hardware_interface::ComponentInfo &joint)
     {
+        prefix = joint.parameters["prefix"];
+        if (prefix.empty()) {
+            prefix = "";
+        }
         return true;
     }
 
     void export_state_interface(std::vector<hardware_interface::StateInterface> &state_interfaces)
     {
         state_interfaces.emplace_back(
-            hardware_interface::StateInterface("joint3", hardware_interface::HW_IF_VELOCITY, &joint_3_actual_velocity));
+            hardware_interface::StateInterface(prefix + "joint3", hardware_interface::HW_IF_VELOCITY, &joint_3_actual_velocity));
         state_interfaces.emplace_back(
-            hardware_interface::StateInterface("joint3", hardware_interface::HW_IF_EFFORT, &joint_3_actual_effort));
+            hardware_interface::StateInterface(prefix + "joint3", hardware_interface::HW_IF_EFFORT, &joint_3_actual_effort));
     }
 
     void export_command_interface(std::vector<hardware_interface::CommandInterface> &command_interfaces)

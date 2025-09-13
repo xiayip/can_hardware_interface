@@ -13,11 +13,17 @@ namespace can_data_plugins
 
 struct PiperJointFeedback12 : public can_data_plugins::CanDataBase
 {
+    std::string prefix;
+
     double joint_1_actual_position = 0.0;
     double joint_2_actual_position = 0.0;
 
     bool initialize(hardware_interface::ComponentInfo &joint)
     {
+        prefix = joint.parameters["prefix"];
+        if (prefix.empty()) {
+            prefix = "";
+        }
         return true;
     }
 
@@ -25,9 +31,9 @@ struct PiperJointFeedback12 : public can_data_plugins::CanDataBase
     {
         RCLCPP_INFO(rclcpp::get_logger("PiperJointCtrlData"), "Exporting joint 1 and 2 state interfaces");
         state_interfaces.emplace_back(
-            hardware_interface::StateInterface("joint1", hardware_interface::HW_IF_POSITION, &joint_1_actual_position));
+            hardware_interface::StateInterface(prefix + "joint1", hardware_interface::HW_IF_POSITION, &joint_1_actual_position));
         state_interfaces.emplace_back(
-            hardware_interface::StateInterface("joint2", hardware_interface::HW_IF_POSITION, &joint_2_actual_position));
+            hardware_interface::StateInterface(prefix + "joint2", hardware_interface::HW_IF_POSITION, &joint_2_actual_position));
     }
 
     void export_command_interface(std::vector<hardware_interface::CommandInterface> &command_interfaces)

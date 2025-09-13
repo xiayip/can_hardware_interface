@@ -36,6 +36,8 @@ namespace can_data_plugins
 
 struct PiperJointHighSpeedFeedback4 : public can_data_plugins::CanDataBase
 {
+    std::string prefix;
+
     double COEFFICIENT_1_to_3 = 1.18125;
     double COEFFICIENT_4_to_6 = 0.95844;
     double joint_4_actual_velocity = 0.0;
@@ -43,22 +45,26 @@ struct PiperJointHighSpeedFeedback4 : public can_data_plugins::CanDataBase
 
     bool initialize(hardware_interface::ComponentInfo &joint)
     {
+        prefix = joint.parameters["prefix"];
+        if (prefix.empty()) {
+            prefix = "";
+        }
         return true;
     }
 
     void export_state_interface(std::vector<hardware_interface::StateInterface> &state_interfaces)
     {
         state_interfaces.emplace_back(
-            hardware_interface::StateInterface("joint4", hardware_interface::HW_IF_VELOCITY, &joint_4_actual_velocity));
+            hardware_interface::StateInterface(prefix + "joint4", hardware_interface::HW_IF_VELOCITY, &joint_4_actual_velocity));
         state_interfaces.emplace_back(
-            hardware_interface::StateInterface("joint4", hardware_interface::HW_IF_EFFORT, &joint_4_actual_effort));
+            hardware_interface::StateInterface(prefix + "joint4", hardware_interface::HW_IF_EFFORT, &joint_4_actual_effort));
     }
 
-    void export_command_interface(std::vector<hardware_interface::CommandInterface> &command_interfaces)
+    void export_command_interface(std::vector<hardware_interface::CommandInterface> & /*command_interfaces*/)
     {
     }
 
-    void read_state(const int id, const uint8_t data[8])
+    void read_state(const int /*id*/, const uint8_t data[8])
     {
         // read joint 4 velocity from data[0] to data[1]
         int16_t joint_4_actual_velocity_raw = (int16_t(int8_t(data[0]) << 8) | uint8_t(data[1]));
@@ -70,13 +76,13 @@ struct PiperJointHighSpeedFeedback4 : public can_data_plugins::CanDataBase
         //     id, joint_4_actual_velocity, joint_4_actual_effort);
     }
 
-    bool write_target(const int id, uint8_t (&data)[8])
+    bool write_target(const int /*id*/, uint8_t (&data)[8])
     {
         return false;
     }
 
-    bool perform_switch(const std::vector<std::string> &start_interfaces,
-                        const std::vector<std::string> &stop_interfaces)
+    bool perform_switch(const std::vector<std::string> &/*start_interfaces*/,
+                        const std::vector<std::string> &/*stop_interfaces*/)
     {
         return true;
     }
