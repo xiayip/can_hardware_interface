@@ -93,8 +93,8 @@ struct PiperJointMitCtrl2 : public can_data_plugins::CanDataBase
         data[6] = ((kd_tmp & 0x0F) << 4) | ((t_tmp >> 4) & 0x0F); // Low byte of kd and high nibble of torque
         data[7] = (t_tmp & 0x0F) | 0x00; // Low byte of torque and CRC placeholder
 
-        RCLCPP_INFO(rclcpp::get_logger("PiperJointMitCtrl2"), "Write target for ID %03x: Joint 2 pos: %.2f, vel: %.2f, kp: %.2f, kd: %.2f, t: %.2f",
-            id, joint_2_target_position, joint_2_target_velocity, joint_2_target_kp, joint_2_target_kd, joint_2_target_torque);
+        // RCLCPP_INFO(rclcpp::get_logger("PiperJointMitCtrl2"), "Write target for ID %03x: Joint 2 pos: %.2f, vel: %.2f, kp: %.2f, kd: %.2f, t: %.2f",
+        //     id, joint_2_target_position, joint_2_target_velocity, joint_2_target_kp, joint_2_target_kd, joint_2_target_torque);
         return true;
     }
 
