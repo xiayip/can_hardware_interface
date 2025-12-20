@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <map>
 #include <utility>
 
@@ -44,6 +45,10 @@ namespace can_data_plugins
         double target_accleration = std::numeric_limits<double>::quiet_NaN();
         double target_deceleration = std::numeric_limits<double>::quiet_NaN();
 
+        using Clock = std::chrono::steady_clock;
+        Clock::time_point last_write_time = Clock::now();
+        double min_write_period_sec = 0.02; // throttle to 50 Hz by default
+
         bool initialize(hardware_interface::ComponentInfo &joint)
         {
             joint_name = joint.name;
@@ -52,6 +57,20 @@ namespace can_data_plugins
             target_torque = 1.0;
             target_accleration = 1.0;
             target_deceleration = 1.0;
+
+            // Optional throttling parameter: write_period_ms or write_period_sec
+            auto period_ms_it = joint.parameters.find("write_period_ms");
+            if (period_ms_it != joint.parameters.end()) {
+                min_write_period_sec = std::stod(period_ms_it->second) / 1000.0;
+            }
+            auto period_sec_it = joint.parameters.find("write_period_sec");
+            if (period_sec_it != joint.parameters.end()) {
+                min_write_period_sec = std::stod(period_sec_it->second);
+            }
+            if (min_write_period_sec < 0.0) {
+                min_write_period_sec = 0.0;
+            }
+
             return true;
         }
 
@@ -92,6 +111,14 @@ namespace can_data_plugins
 
         bool write_target(const int id, uint8_t (&data)[8])
         {
+            (void)id; // unused
+            
+            const auto now = Clock::now();
+            const auto elapsed = std::chrono::duration<double>(now - last_write_time).count();
+            if (elapsed < min_write_period_sec) {
+                return false; // throttle: skip this cycle
+            }
+
             uint8_t target_position_raw = static_cast<uint8_t>((1.0f - target_position) * 255.0);
             data[1] = target_position_raw;
             uint8_t target_velocity_raw = static_cast<uint8_t>(target_velocity * 255.0);
@@ -102,6 +129,8 @@ namespace can_data_plugins
             data[4] = target_accleration_raw;
             uint8_t target_deceleration_raw = static_cast<uint8_t>(target_deceleration * 255.0);
             data[5] = target_deceleration_raw;
+
+            last_write_time = now;
 
             // debug
             // RCLCPP_INFO(rclcpp::get_logger("OmniPickerData"), ">>>>>>>send cmd node id: %d, target_position: %f, target_velocity: %f, target_torque: %f, target_accleration: %f, target_deceleration: %f",

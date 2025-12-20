@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <chrono>
 #include <fcntl.h>
+#include <sstream>
+#include <vector>
 
 namespace socket_can_hardware_interface {
 
@@ -76,6 +78,43 @@ CallbackReturn SocketCanHardwareInterface::on_configure(const rclcpp_lifecycle::
     if (ioctl(can_socket_fd_, SIOCGIFINDEX, &ifr) < 0) {
         RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Failed to get interface index for %s", can_interface.c_str());
         return CallbackReturn::ERROR;
+    }
+
+    // Optional receive filters: comma-separated list of id:mask (hex or dec), e.g. "0x123:0x7FF,0x456:0x7FF"
+    auto filters_param = info_.hardware_parameters.find("can_filters");
+    if (filters_param != info_.hardware_parameters.end() && !filters_param->second.empty()) {
+        std::vector<struct can_filter> filters;
+        std::stringstream ss(filters_param->second);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            const auto pos = token.find(':');
+            if (pos == std::string::npos) {
+                RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"),
+                            "Ignoring invalid CAN filter entry '%s'", token.c_str());
+                continue;
+            }
+            try {
+                auto id = static_cast<canid_t>(std::stoul(token.substr(0, pos), nullptr, 0));
+                auto mask = static_cast<canid_t>(std::stoul(token.substr(pos + 1), nullptr, 0));
+                struct can_filter f{};
+                f.can_id = id;
+                f.can_mask = mask;
+                filters.push_back(f);
+                RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"),
+                            "Adding CAN filter: id=0x%X, mask=0x%X", id, mask);
+            } catch (const std::exception &e) {
+                RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"),
+                            "Failed to parse CAN filter '%s': %s", token.c_str(), e.what());
+            }
+        }
+        if (!filters.empty()) {
+            if (setsockopt(can_socket_fd_, SOL_CAN_RAW, CAN_RAW_FILTER, filters.data(),
+                           static_cast<socklen_t>(filters.size() * sizeof(struct can_filter))) < 0) {
+                RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Failed to apply CAN filters");
+                return CallbackReturn::ERROR;
+            }
+            RCLCPP_INFO(rclcpp::get_logger("SocketCanHardwareInterface"), "Applied %zu CAN filters", filters.size());
+        }
     }
 
     // Bind the socket to the CAN interface
@@ -196,7 +235,7 @@ hardware_interface::return_type SocketCanHardwareInterface::read(const rclcpp::T
                 RCLCPP_WARN(rclcpp::get_logger("SocketCanHardwareInterface"), "CAN read error: %s", strerror(errno));
                 break;
             }
-        } else if (nbytes < sizeof(struct can_frame)) {
+        } else if (static_cast<size_t>(nbytes) < sizeof(struct can_frame)) {
             RCLCPP_ERROR(rclcpp::get_logger("SocketCanHardwareInterface"), "Incomplete CAN frame");
             return hardware_interface::return_type::ERROR;
         } else {
