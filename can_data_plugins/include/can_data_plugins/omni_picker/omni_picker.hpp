@@ -98,7 +98,7 @@ namespace can_data_plugins
             state = data[1];
 
             auto actual_position_raw = data[2];
-            actual_position = static_cast<double>(actual_position_raw) / 255.0;
+            actual_position = 1 - static_cast<double>(actual_position_raw) / 255.0;
             auto actual_velocity_raw = data[3];
             actual_velocity = static_cast<double>(actual_velocity_raw) / 255.0;
             auto actual_torque_raw = data[4];
