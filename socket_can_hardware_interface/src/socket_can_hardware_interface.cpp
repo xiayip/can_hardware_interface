@@ -210,7 +210,7 @@ hardware_interface::return_type SocketCanHardwareInterface::read(const rclcpp::T
     ssize_t nbytes;
     int frames_read = 0;
     const int max_frames_per_cycle = can_data_.size();
-    const auto max_read_time = std::chrono::microseconds(can_data_.size() * 300); // Adjust based on expected frame size and processing time
+    const auto max_read_time = std::chrono::microseconds(can_data_.size() * 1000); // Adjust based on expected frame size and processing time
 
     auto start_time = std::chrono::high_resolution_clock::now();
     while (frames_read <= max_frames_per_cycle) {
